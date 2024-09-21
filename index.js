@@ -15,6 +15,7 @@ app.use('/user' , userRouter);
 app.use('/admin' , adminRouter);
 app.use('/course' , courseRouter);
 
+
 app.listen(3000 , () =>{
     console.log("App is listening on port 3000");   
 });
