@@ -3,14 +3,11 @@ const app = express();
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-
 const {userRouter} = require ('./routes/user');
 const { courseRouter } = require('./routes/course');
 const { adminRouter } = require('./routes/admin');
 app.use(express.json());
 
-
-const {userModel,adminModel,purchaseModel,courseModel} = require('./db')
 const mongoose = require("mongoose");
 mongoose.connect(process.env.MONGODB_URL);
 
