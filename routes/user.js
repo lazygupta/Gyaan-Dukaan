@@ -18,8 +18,8 @@ userRouter.post("/signup", (req, res) => {
   }
 
   try {
-    bcrypt.hash(password, saltRounds, function(err, hash) {
-      userModel.create({
+    bcrypt.hash(password, saltRounds, async function(err, hash) {
+      await userModel.create({
         email: email,
         password: hash,
         firstname,
@@ -60,13 +60,15 @@ userRouter.post("/signin", async (req, res) => {
           message: "Wrong Password",
         });
       } else {
-      let token = jwt.sign(
+      const token = jwt.sign(
         {
           id: user._id,
           role: "user",
         },
-        process.env.JWT_SECRET
-      );  
+        process.env.JWT_USER_SECRET
+      );
+
+      // Do cookie logic - assignment
 
       res.setHeader('token', token);
 
@@ -88,6 +90,7 @@ userRouter.get("/purchases", (req, res) => {
     message: "User Purchases endpoint",
   });
 });
+
 
 module.exports = {
   userRouter: userRouter,

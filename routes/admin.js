@@ -1,14 +1,15 @@
 const {Router} = require('express')
-const {adminModel} = require('../db')
+const {adminModel, courseModel} = require('../db')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const saltRounds = 5;
+const { adminAuth } = require('../middlewares/index')
 
 const adminRouter= Router();
 
 // Admin Signup working
 adminRouter.post('/signup', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, firstname, lastname } = req.body;
 
   if (!email || !password) {
     res.status(401).json({
@@ -17,10 +18,12 @@ adminRouter.post('/signup', async (req, res) => {
   }
 
   try {
-    bcrypt.hash(password, saltRounds, function(err, hash) {
-      adminModel.create({
+    bcrypt.hash(password, saltRounds, async function(err, hash) {
+      await adminModel.create({
         email: email,
-        password: hash
+        password: hash,
+        firstname,
+        lastname
       });
     });
     
@@ -40,6 +43,7 @@ adminRouter.post('/signin', async (req, res) => {
       message: "Username or Password can't be empty",
     });
   }
+
 
   try {
     const admin = await adminModel.findOne({ email });
@@ -61,10 +65,11 @@ adminRouter.post('/signin', async (req, res) => {
           id: admin._id,
           role: "user",
         },
-        process.env.JWT_SECRET
+        process.env.JWT_ADMIN_SECRET
       );
       res.json({ 
-        token
+        token,
+        message: "You are signed in succesfully"
       }); 
     }
   });
@@ -75,7 +80,34 @@ adminRouter.post('/signin', async (req, res) => {
   }
 });
 
-adminRouter.post('/course' ,(req,res) => {
+adminRouter.post('/course' , adminAuth, async (req,res) => {
+  const adminId = req.adminId;
+
+  const { title, description , imageUrl, price} = req.body;
+  try {
+    const course = await courseModel.create({
+      title,
+      description,
+      imageUrl,
+      price,
+      creatorId: adminId
+    })
+    res.json({
+      message: "Course created",
+      courseId: course._id
+    })
+  } catch (err) {
+    res.json({
+      Error: `${err}`
+    })
+  }
+})
+
+adminRouter.put('/course' ,(req,res) => {
+
+})
+
+adminRouter.get('/course/bulk' ,(req,res) => {
 
 })
 
